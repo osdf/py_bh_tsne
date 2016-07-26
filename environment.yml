@@ -1,0 +1,14 @@
+name: tsne-dev
+dependencies:
+  - python=2.7
+  - cython
+  - ipython
+  - numpy
+  - scipy
+  - scikit-learn
+  - pytest
+  - pylint
+  - pip:
+    - pytest-cov
+    - yapf
+    - versioneer

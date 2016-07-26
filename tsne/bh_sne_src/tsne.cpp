@@ -25,19 +25,23 @@ extern "C" {
 using namespace std;
 
 // Perform t-SNE
-void TSNE::run(double* X, int N, int D, double* Y, int no_dims, double perplexity, double theta) {
+void TSNE::run(double* X, int N, int D, double* Y, int no_dims, double perplexity, double theta, unsigned int seed, unsigned int miter, unsigned int sliter, unsigned int msiter, double m, double fm) {
+    // Initalize the pseudorandom number generator
+    srand(seed);
     
     // Determine whether we are using an exact algorithm
     if(N - 1 < 3 * perplexity) { printf("Perplexity too large for the number of data points!\n"); exit(1); }
-    printf("Using no_dims = %d, perplexity = %f, and theta = %f\n", no_dims, perplexity, theta);
+    printf("Using no_dims = %d, perplexity = %f, theta = %f, seed=%d\n", no_dims, perplexity, theta, seed);
     bool exact = (theta == .0) ? true : false;
     
     // Set learning parameters
     float total_time = .0;
     clock_t start, end;
-	int max_iter = 1000, stop_lying_iter = 250, mom_switch_iter = 250;
-	double momentum = .5, final_momentum = .8;
-	double eta = 200.0;
+    int max_iter = miter;
+    int stop_lying_iter = sliter;
+    int mom_switch_iter = msiter;
+    double momentum = m, final_momentum = fm;
+    double eta = 200.0;
     
     // Allocate some memory
     double* dY    = (double*) malloc(N * no_dims * sizeof(double));
@@ -49,12 +53,14 @@ void TSNE::run(double* X, int N, int D, double* Y, int no_dims, double perplexit
     
     // Normalize input data (to prevent numerical problems)
     printf("Computing input similarities...\n");
+
     start = clock();
     zeroMean(X, N, D);
     double max_X = .0;
     for(int i = 0; i < N * D; i++) {
         if(X[i] > max_X) max_X = X[i];
     }
+
     for(int i = 0; i < N * D; i++) X[i] /= max_X;
     
     // Compute input similarities for exact t-SNE
@@ -845,4 +851,3 @@ void TSNE::save_data(double* data, int* landmarks, double* costs, int n, int d) 
 //    }
 //    delete(tsne);
 //}
-
